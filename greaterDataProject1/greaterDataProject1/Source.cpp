@@ -10,6 +10,7 @@ int main()
 {
 	//Declarations:
 	int userChoice;
+	int assignmentAddSpecify; //used to determine if assignments will be added by the user or by bulk with File I/O
 	//Date tempDate;
 	//assignmentManager assignments;
 	//File I/O
@@ -66,4 +67,19 @@ int main()
 	
 	system("pause"); //not necessary
 	return 0;
+}
+
+assignment userCreateAssignment()
+{
+	//Declarations:
+	assignment userAssignment;
+	Date tempDate;
+	///////////////
+	cout << "Enter the due date of the assignment" << endl;
+	cin >> tempDate;
+	userAssignment.editDueDate(tempDate);
+	cout << "Enter the date assigned of the assignment" << endl;
+	userAssignment.editAssignedDate(tempDate);
+	userAssignment.editDescription();
+	return userAssignment;
 }

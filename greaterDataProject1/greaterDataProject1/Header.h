@@ -33,6 +33,10 @@ class assignment
 		assignmentStatus status;
 		string description;
 	public:
+		assignment()
+		{
+			
+		}
 		assignment(Date assignedDate, Date dueDate, assignmentStatus status, string descrition)
 		{
 			this->assignedDate = assignedDate;
@@ -57,6 +61,10 @@ class assignment
 			cout << "Enter new description for the assignment" << endl;
 			cin >> description;
 		}
+		void editAssignedDate(Date specifiedDate)
+		{
+			assignedDate = specifiedDate;
+		}
 		void editDueDate(Date specifiedDate)
 		{
 			dueDate = specifiedDate;
@@ -70,7 +78,7 @@ class assignment
 		}
 		friend istream &operator>>(istream &input, assignment &A)
 		{
-			input >> A.assignedDate >> A.dueDate >> A.description; //need to overload status
+			input >> A.assignedDate >> A.dueDate >> A.description;
 			return input;
 		}
 		bool operator==(assignment givenAssignment)
@@ -103,41 +111,33 @@ class assignmentManager
 
 		}
 		//Add assignment function by Cooper Kertz, modified for the new assignmentManger class by William Munshaw
-		void addAssignment(Date givenAssignedDate, Date giveDueDate, assignmentStatus givenStatus, string givenDescription) 
+		void addAssignment(assignment givenAssignment) 
 		{
 			//Declarations:
 			bool wasFound = false;
 			///////////////
-			//Take parameters. If it already exists, reject it. If it is late, push back onto completed, otherwise push back onto assigned
-			/*cout << "What is your assignment's assigned date?" << endl;
-			cin >> assigned_date;
-			cout << "What is your assignment's name?" << endl;
-			cin >> description;
-			cout << "What is your assignment's due date?" << endl;
-			cin >> due_date;*/
-
 			list<assignment>::iterator itr = assigned.begin(); // Iterator is scanning to see if assignment already exists
 			while (itr != assigned.end())
 			{
-				if (itr->getAssignedDate() == givenAssignedDate)
+				if (itr->getAssignedDate() == givenAssignment.getAssignedDate())
 				{
 					cout << "This assignment already exists in the system." << endl;
 					wasFound = true;
 				}
+				itr++;
 			}
+			//need checks for date validation
 			if (!wasFound)
 			{
-				if (giveDueDate <= givenAssignedDate)
+				if (givenAssignment.getDueDate() <= givenAssignment.getAssignedDate()) //Ask about this tomorrow (2/25/16), clarify with Kuhail about "Add a new assignment" 
 				{
-					givenStatus = LATE;
-					assignment assignment(givenAssignedDate, giveDueDate, givenStatus, givenDescription);
-					completed.push_back(assignment);
+					givenAssignment.changeStatus(LATE);
+					completed.push_back(givenAssignment);
 				}
 				else
 				{
-					givenStatus = ASSIGNED;
-					assignment assignment(givenAssignedDate, giveDueDate, givenStatus, givenDescription);
-					assigned.push_back(assignment);
+					givenAssignment.changeStatus(ASSIGNED);
+					assigned.push_back(givenAssignment);
 				}
 			}			
 		}
@@ -233,8 +233,40 @@ class assignmentManager
 			//Declarations:
 			list<assignment>::iterator assignedItr = assigned.begin();
 			list<assignment>::iterator completedItr = completed.begin();
+			assignment tempAssignment;
 			///////////////
-			
+			//sort assigned and completed list
+			while (assignedItr++ != assigned.end() && completedItr++ != completed.end())
+			{
+				if (assignedItr->getDueDate() > assignedItr++->getDueDate())
+				{
+					tempAssignment = *assignedItr;
+					*assignedItr = *assignedItr++;
+					*assignedItr++ = tempAssignment;
+					assignedItr = assigned.begin();
+				}
+				if (completedItr->getDueDate() > completedItr++->getDueDate())
+				{
+					tempAssignment = *completedItr;
+					*completedItr = *completedItr++;
+					*completedItr++ = tempAssignment;
+					completedItr = completed.begin();
+				}
+				completedItr++;
+				assignedItr++;
+			}
+			//short completed list
+			/*while (completedItr++ != completed.end())
+			{
+				if (completedItr->getDueDate > completedItr++->getDueDate())
+				{
+					tempAssignment = *completedItr;
+					*completedItr = *completedItr++;
+					*completedItr++ = tempAssignment;
+					completedItr = completed.begin();
+				}
+				completedItr++;
+			}*/
 		}
 		//Complete Assignments function by William Munshaw
 		void completeAssignment(Date specifiedDate, Date currentDate)
@@ -260,4 +292,8 @@ class assignmentManager
 			}
 		}
 };
+/*-----------------------------------------------------------------------------*/
+
+/*------------------------------Prototype Definitions--------------------------*/
+assignment userCreateAssignment();
 /*-----------------------------------------------------------------------------*/
