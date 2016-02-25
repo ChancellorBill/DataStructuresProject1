@@ -76,10 +76,43 @@ class assignment
 			cout << assignedDate.toString() << endl;
 			cout << status << endl;
 		}
-		friend istream &operator>>(istream &input, assignment &A)
+		friend istream &operator>>(istream &input, assignment &A) //meant for File I/O only, not user interaction
 		{
-			input >> A.assignedDate >> A.dueDate >> A.description;
+			//Declarations:
+			int statusType;
+			///////////////
+			input >> A.assignedDate >> A.dueDate >> A.description >> statusType;
+			switch (statusType)
+			{
+				case 1:
+					A.status = ASSIGNED;
+					break;
+				case 2:
+					A.status = COMPLETED;
+					break;
+				case 3:
+					A.status = LATE;
+					break;
+			}
 			return input;
+		}
+		friend ostream &operator<<(ostream &output, assignment &A) //meant for File I/O only, not user interaction
+		{
+			
+			output << A.assignedDate.toString() << A.dueDate.toString() << A.description;
+			switch (A.status)
+			{
+				case ASSIGNED:
+					output << 1;
+					break;
+				case COMPLETED:
+					output << 2;
+					break;
+				case LATE:
+					output << 3;
+					break;
+			}
+			return output;
 		}
 		bool operator==(assignment givenAssignment)
 		{
@@ -170,9 +203,9 @@ class assignmentManager
 		int lateAssignmentCount()
 		{
 			//Declarations:
-			int lateCount;
+			int lateCount = 0;
 			list<assignment>::iterator itr = completed.begin();
-			///////////////			
+			///////////////
 			while (itr != completed.end())
 			{
 				if (itr->getDueDate() <= itr->getAssignedDate())
