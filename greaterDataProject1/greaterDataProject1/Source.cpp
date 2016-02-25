@@ -14,18 +14,22 @@ int main()
 	Date tempDate; //used for searching the assignment manager lists
 	Date today; //declare what to today is to determine if an assignment is late or not
 	assignmentManager assignments;
-	//File I/O
-	//ifstream fin("input.txt");
-	////if input file not found, quit with an error message
-	//if (!fin)
-	//{
-	//	cout << "Input file not opened!" << endl;
-	//	exit(1);
-	//}
+	bool inValidDate = true;
 	///////////////
 	cout << "Welcome to Assignment Manger" << endl;
 	cout << "First, what is today?" << endl;
-	cin >> today;
+	while (inValidDate == true)
+	{
+		inValidDate = false;
+		try
+		{
+			cin >> today;
+		}
+		catch (std::exception e) {
+			cout << "Today is invalid, try again" << endl;
+			inValidDate = true;
+		}
+	}	
 	do
 	{
 		cout << "Select option: " << endl;
@@ -36,7 +40,8 @@ int main()
 		cout << "(5) Display number of late assignments" << endl;
 		cout << "(6) Save" << endl;
 		cout << "(7) Re-declare today's date" << endl;
-		cout << "(8) Exit" << endl;
+		cout << "(8) Sort assignments" << endl;
+		cout << "(9) Exit" << endl;
 		cin >> userChoice;
 		switch (userChoice) 
 		{
@@ -61,7 +66,7 @@ int main()
 				}
 				else if (assignmentAddSpecify == 2)
 				{
-					//File input loop
+					assignments.load_data("database.txt");
 				}
 				else
 				{
@@ -82,20 +87,37 @@ int main()
 				cout << "You have " << assignments.lateAssignmentCount() << " late assignments." << endl;
 				break;
 			case 6: //Save
-
+				assignments.save("database.txt");
+				cout << "Database saved!" << endl;
 				break;
 			case 7: //Redeclare Today's date
 				cout << "What is today?" << endl;
-				cin >> today;
+				inValidDate = true;
+				while (inValidDate == true)
+				{
+					inValidDate = false;
+					try
+					{
+						cin >> today;
+					}
+					catch (std::exception e) {
+						cout << "Today is invalid, try again" << endl;
+						inValidDate = true;
+					}
+				}
 				break;
-			case 8:
+			case 8:	//Sort
+				assignments.sortAssignments();
+				cout << "Assignments sorted!" << endl;
+				break;
+			case 9:
 				//Exit
 				break;
 			default:
 				cout << "Invalid option.  Try again." << endl;
 				break;
 		}	
-	} while (userChoice != 8);
+	} while (userChoice != 9);
 	
 	//system("pause"); //not necessary
 	return 0;
@@ -106,12 +128,38 @@ assignment userCreateAssignment()
 	//Declarations:
 	assignment userAssignment;
 	Date tempDate;
+	bool inValidDate = true;
 	///////////////
 	cout << "Enter the due date of the assignment" << endl;
-	cin >> tempDate;
+	while (inValidDate == true)
+	{
+		inValidDate = false;
+		try
+		{
+			cin >> tempDate;
+		}
+		catch (std::exception e)
+		{
+			cout << "The due date is invalid, try again:" << endl;
+			inValidDate = true;
+		}
+	}
 	userAssignment.editDueDate(tempDate);
 	cout << "Enter the date assigned of the assignment" << endl;
-	cin >> tempDate;
+	inValidDate = true;
+	while (inValidDate == true)
+	{
+		inValidDate = false;
+		try
+		{
+			cin >> tempDate;
+		}
+		catch (std::exception e)
+		{
+			cout << "The assigned date is invalid, try again:" << endl;
+			inValidDate = true;
+		}
+	}
 	userAssignment.editAssignedDate(tempDate);
 	userAssignment.editDescription(); //Entering of description managed by editDescription function
 	return userAssignment;

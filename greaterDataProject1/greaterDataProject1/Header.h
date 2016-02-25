@@ -6,6 +6,7 @@
 #pragma once
 #include <iostream>
 #include <fstream>
+#include <istream>
 //Include statements used on Date.h. DO NOT uncomment them
 //#include <stdexcept> 
 //#include <algorithm> 
@@ -59,7 +60,8 @@ class assignment
 		void editDescription()
 		{
 			cout << "Enter new description for the assignment" << endl;
-			cin >> description;
+			cin.ignore(2, '\0');
+			getline(cin, description);
 		}
 		void editAssignedDate(Date specifiedDate)
 		{
@@ -110,17 +112,17 @@ class assignment
 		friend ostream &operator<<(ostream &output, assignment &A) //meant for File I/O only, not user interaction
 		{
 			
-			output << A.assignedDate.toString() << A.dueDate.toString() << A.description;
+			output << A.assignedDate.toString() << ", " << A.description << ", " << A.dueDate.toString() << ", ";
 			switch (A.status)
 			{
 				case ASSIGNED:
-					output << 1;
+					output << "assigned" << endl;
 					break;
 				case COMPLETED:
-					output << 2;
+					output << "completed" << endl;
 					break;
 				case LATE:
-					output << 3;
+					output << "late" << endl;
 					break;
 			}
 			return output;
@@ -148,11 +150,12 @@ class assignmentManager
 	private:
 		list<assignment>assigned;
 		list<assignment>completed;
+		bool modified;
 	public:
 		//Default constructor
 		assignmentManager()
 		{
-
+			modified = false;
 		}
 		//Add assignment function by Cooper Kertz, modified for the new assignmentManger class by William Munshaw
 		void addAssignment(assignment givenAssignment) 
@@ -170,10 +173,9 @@ class assignmentManager
 				}
 				itr++;
 			}
-			//need checks for date validation
 			if (!wasFound)
 			{
-				if (givenAssignment.getDueDate() <= givenAssignment.getAssignedDate()) //Ask about this tomorrow (2/25/16), clarify with Kuhail about "Add a new assignment" 
+				if (givenAssignment.getDueDate() <= givenAssignment.getAssignedDate())
 				{
 					givenAssignment.changeStatus(LATE);
 					completed.push_back(givenAssignment);
@@ -183,6 +185,7 @@ class assignmentManager
 					givenAssignment.changeStatus(ASSIGNED);
 					assigned.push_back(givenAssignment);
 				}
+				modified = true;
 			}			
 		}
 		//Display assignments function by Cooper Kertz, modified for the new assignmentManger class by William Munshaw
@@ -230,6 +233,15 @@ class assignmentManager
 			//cout << "You have " << lateCount << " late assignments." << endl;
 			return lateCount;
 		}
+
+		string trim(const string& the_string)
+		{
+			size_t p = the_string.find_first_not_of(" ");
+			if (p == string::npos) return "";
+			size_t q = the_string.find_last_not_of(" ");
+			return the_string.substr(p, q - p + 1);
+		}
+
 		//Edit assignment function by William Munshaw
 		void editAssignment(Date specifiedDate)
 		{
@@ -238,10 +250,8 @@ class assignmentManager
 			int userChoice;
 			Date tempDate;
 			bool wasFound = false;
+			bool inValidDate = true;
 			//////////////
-
-			//need to add checks for if due date is invalid
-
 			while (itr != assigned.end())
 			{
 				if (itr->getDueDate() == specifiedDate)
@@ -254,12 +264,25 @@ class assignmentManager
 							{
 							case 1:
 								cout << "Enter new due date:" << endl;
-								cin >> tempDate;
+								while (inValidDate == true)
+								{
+									inValidDate = false;
+									try
+									{
+										cin >> tempDate;
+									}
+									catch (std::exception e) {
+										cout << "Today is invalid, try again" << endl;
+										inValidDate = true;
+									}
+								}
 								itr->editDueDate(tempDate);
+								modified = true;
 								break;
 							case 2:
 								itr->editDescription();
 								cout << "Description edited!" << endl;
+								modified = true;
 								break;
 							default:
 								cout << "Invalid option, try again" << endl;
@@ -292,6 +315,7 @@ class assignmentManager
 					*assignedItr = *assignedItr++;
 					*assignedItr++ = tempAssignment;
 					assignedItr = assigned.begin();
+					completedItr = completed.begin();
 				}
 				if (completedItr->getDueDate() > completedItr++->getDueDate())
 				{
@@ -299,9 +323,11 @@ class assignmentManager
 					*completedItr = *completedItr++;
 					*completedItr++ = tempAssignment;
 					completedItr = completed.begin();
+					assignedItr = assigned.begin();
 				}
 				completedItr++;
 				assignedItr++;
+				modified = true;
 			}
 			//short completed list
 			/*while (completedItr++ != completed.end())
@@ -323,9 +349,6 @@ class assignmentManager
 			list<assignment>::iterator itr = assigned.begin();
 			bool wasFound = false;
 			///////////////
-
-			//add checks for date validation
-
 			while (itr != assigned.end())
 			{
 				if (itr->getAssignedDate() == specifiedDate)
@@ -337,6 +360,71 @@ class assignmentManager
 					wasFound = true;
 				}
 				itr++;
+			}
+		}
+		void load_data(const string& source_name)
+		{
+
+			// Create an input stream for this file.
+			ifstream in(source_name);
+			if (in) { // Stream exists.
+				Date givenDueDate;
+				string givenDescription;
+				Date givenAssignedDate;
+				assignmentStatus givenStatus;
+				string line;
+				while (getline(in, line)) { //read the next line in the file, if no more lines are availble, the while loop will exist.
+					String_Tokenizer st(line, ","); //a tokenizer for parsing a line of tokens (the tokens are seperated by commas)
+					givenDueDate = Date(trim(st.next_token()));
+					givenDescription = trim(st.next_token());
+					givenAssignedDate = Date(trim(st.next_token()));
+					string status = trim(st.next_token());
+					if (status == "late")
+						givenStatus = assignmentStatus::LATE;
+					else if (status == "assigned")
+					{
+						givenStatus = assignmentStatus::ASSIGNED;
+					}
+					else if (status == "completed")
+					{
+						givenStatus = assignmentStatus::COMPLETED;
+					}
+					assignment new_assignment = assignment(givenAssignedDate, givenDueDate, givenStatus, givenDescription);
+					if (givenStatus == assignmentStatus::COMPLETED || givenStatus == assignmentStatus::LATE)
+						completed.push_back(new_assignment);
+					else
+						assigned.push_back(new_assignment);
+				}
+			}
+			// Close the file.
+			in.close();
+		}
+		void save(const string& source_name) //Need to edit this
+		{
+			if (modified) {  // if not modified, do nothing
+							 // Create an output stream.
+				ofstream out(source_name.c_str());
+				list<assignment>::iterator assignedITR = assigned.begin();
+				list<assignment>::iterator completedITR = completed.begin();
+				while (assignedITR != assigned.end())
+				{
+					/*out << assignedITR->getDueDate << ", ";
+					out << assignedITR->getDescription << ", ";
+					out << assignedITR->getAssignedDate << ", ";*/
+					out << *assignedITR;
+					assignedITR++;
+				}
+				while (completedITR != completed.end())
+				{
+					/*out << completedITR->getDueDate << ", ";
+					out << completedITR->getDescription << ", ";
+					out << completedITR->getAssignedDate << ", ";*/
+					out << *completedITR;
+					completedITR++;
+				}
+				// Close the output stream.
+				out.close();
+				modified = false;
 			}
 		}
 };
