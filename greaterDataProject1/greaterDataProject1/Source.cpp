@@ -53,8 +53,20 @@ int main()
 				}
 				break;
 			case 2:
-				// add prompts for the assignment to be added
-				//assignments.addAssignment();
+				cout << "Would you like to add an assignment by typing it in (1), or bulk add assignments from the input file (2)" << endl;
+				cin >> assignmentAddSpecify;
+				if (assignmentAddSpecify == 1)
+				{
+					assignments.addAssignment(userCreateAssignment());
+				}
+				else if (assignmentAddSpecify == 2)
+				{
+					//File input loop
+				}
+				else
+				{
+					cout << "Incorrect option. Try again" << endl;
+				}
 				break;
 			case 3:
 				cout << "State the due date of the assignment you would like to edit:" << endl;
@@ -77,6 +89,7 @@ int main()
 				cin >> today;
 				break;
 			case 8:
+				//Exit
 				break;
 			default:
 				cout << "Invalid option.  Try again." << endl;
@@ -98,7 +111,8 @@ assignment userCreateAssignment()
 	cin >> tempDate;
 	userAssignment.editDueDate(tempDate);
 	cout << "Enter the date assigned of the assignment" << endl;
+	cin >> tempDate;
 	userAssignment.editAssignedDate(tempDate);
-	userAssignment.editDescription();
+	userAssignment.editDescription(); //Entering of description managed by editDescription function
 	return userAssignment;
 }

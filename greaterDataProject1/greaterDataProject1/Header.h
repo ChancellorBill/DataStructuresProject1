@@ -74,7 +74,18 @@ class assignment
 			cout << description << endl;
 			cout << dueDate.toString() << endl;
 			cout << assignedDate.toString() << endl;
-			cout << status << endl;
+			switch (status)
+			{
+			case 1:
+				cout << "ASSIGNED" << endl;
+				break;
+			case 2:
+				cout << "COMPLETED" << endl;
+				break;
+			case 3:
+				cout << "LATE" << endl;
+				break;
+			}
 		}
 		friend istream &operator>>(istream &input, assignment &A) //meant for File I/O only, not user interaction
 		{
@@ -177,12 +188,14 @@ class assignmentManager
 		//Display assignments function by Cooper Kertz, modified for the new assignmentManger class by William Munshaw
 		void displayAssignments(int rootMenuChoice)
 		{
+			//cout << "Here1" << endl;
 			//Declarations:
 			list<assignment>::iterator assignedItr = assigned.begin();
 			list<assignment>::iterator completedItr = completed.begin();
 			///////////////
 			switch (rootMenuChoice)
 			{
+				//cout << "Here2" << endl;
 				case 1: // for displaying the assigned list
 					while (assignedItr != assigned.end())
 					{
