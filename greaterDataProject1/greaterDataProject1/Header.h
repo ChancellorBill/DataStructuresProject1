@@ -181,8 +181,10 @@ class assignmentManager
 				}
 
 			}
-			cout << "You have " << lateCount << " late assignments." << endl;
+			//cout << "You have " << lateCount << " late assignments." << endl;
+			return lateCount;
 		}
+		//Edit assignment function by William Munshaw
 		void editAssignment(Date specifiedDate)
 		{
 			//Declarations:
@@ -199,25 +201,25 @@ class assignmentManager
 				if (itr->getDueDate() == specifiedDate)
 				{
 					cout << "Would you like to edit the due date (1) or the description (2)?" << endl;
-					while (userChoice != 1 || userChoice != 2)
+					do
 					{
-						cin >> userChoice;
-						switch (userChoice)
-						{
-						case 1:
-							cout << "Enter new due date:" << endl;
-							cin >> tempDate;
-							itr->editDueDate(tempDate);
-							break;
-						case 2:
-							itr->editDescription();
-							cout << "Description edited!" << endl;
-							break;
-						default:
-							cout << "Invalid option, try again" << endl;
-							break;
-						}
-					}
+							cin >> userChoice;
+							switch (userChoice)
+							{
+							case 1:
+								cout << "Enter new due date:" << endl;
+								cin >> tempDate;
+								itr->editDueDate(tempDate);
+								break;
+							case 2:
+								itr->editDescription();
+								cout << "Description edited!" << endl;
+								break;
+							default:
+								cout << "Invalid option, try again" << endl;
+								break;
+							}
+					} while (userChoice != 1 || userChoice != 2);
 					wasFound = true;
 				}
 				itr++;
