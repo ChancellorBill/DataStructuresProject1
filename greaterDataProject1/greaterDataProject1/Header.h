@@ -6,6 +6,7 @@
 #pragma once
 #include <iostream>
 #include <fstream>
+//Include statements used on Date.h. DO NOT uncomment them
 //#include <stdexcept> 
 //#include <algorithm> 
 //#include <functional> 
@@ -31,7 +32,6 @@ class assignment
 		Date dueDate;
 		assignmentStatus status;
 		string description;
-		bool isLate; //to be depricated
 	public:
 		assignment(Date assignedDate, Date dueDate, assignmentStatus status, string descrition)
 		{
@@ -39,7 +39,6 @@ class assignment
 			this->dueDate = dueDate;
 			this->status = status;
 			this->description = description;
-			isLate = false; // to be depricated
 		}
 		Date getAssignedDate()
 		{
@@ -64,12 +63,16 @@ class assignment
 		}
 		void display()
 		{
-			//to be done
+			cout << description << endl;
+			cout << dueDate.toString() << endl;
+			cout << assignedDate.toString() << endl;
+			cout << status << endl;
 		}
-		/*friend istream& operator>>(istream& input, assignment &A)
+		friend istream &operator>>(istream &input, assignment &A)
 		{
-			input >> A.assignedDate >> A.dueDate >> A.status >> A.description;
-		}*/
+			input >> A.assignedDate >> A.dueDate >> A.description; //need to overload status
+			return input;
+		}
 		bool operator==(assignment givenAssignment)
 		{
 			//Declarations:
@@ -116,9 +119,7 @@ class assignmentManager
 			list<assignment>::iterator itr = assigned.begin(); // Iterator is scanning to see if assignment already exists
 			while (itr != assigned.end())
 			{
-				assignment assignment = *itr;
-
-				if (assignment.getDescription() == givenDescription)
+				if (itr->getAssignedDate() == givenAssignedDate)
 				{
 					cout << "This assignment already exists in the system." << endl;
 					wasFound = true;
@@ -230,10 +231,10 @@ class assignmentManager
 		void sortAssignments()
 		{
 			//Declarations:
-			list<assignment>::iterator itr = assigned.begin();
-			Date dueSoon = itr->getDueDate();
+			list<assignment>::iterator assignedItr = assigned.begin();
+			list<assignment>::iterator completedItr = completed.begin();
 			///////////////
-
+			
 		}
 		//Complete Assignments function by William Munshaw
 		void completeAssignment(Date specifiedDate, Date currentDate)
@@ -248,9 +249,11 @@ class assignmentManager
 			while (itr != assigned.end())
 			{
 				if (itr->getAssignedDate() == specifiedDate)
-				{	
-					//Delete from assigned list
+				{					
+					itr->changeStatus(COMPLETED);
 					completed.push_back(*itr); //adds the assignment to the completed list
+					//Delete from assigned list
+					assigned.remove(*itr);
 					wasFound = true;
 				}
 				itr++;
