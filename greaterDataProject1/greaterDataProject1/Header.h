@@ -57,6 +57,10 @@ class assignment
 		{
 			return description;
 		}
+		assignmentStatus getStatus()
+		{
+			return status;
+		}
 		void editDescription()
 		{
 			cout << "Enter new description for the assignment" << endl;
@@ -73,21 +77,23 @@ class assignment
 		}
 		void display()
 		{
-			cout << description << endl;
-			cout << dueDate.toString() << endl;
-			cout << assignedDate.toString() << endl;
+			cout << "Description: " << description << endl;
+			cout << "Due date: " << dueDate.toString() << endl;
+			cout << "Date assigned: " << assignedDate.toString() << endl;
+			cout << "Status: ";
 			switch (status)
 			{
-			case 1:
+			case ASSIGNED:
 				cout << "ASSIGNED" << endl;
 				break;
-			case 2:
+			case COMPLETED:
 				cout << "COMPLETED" << endl;
 				break;
-			case 3:
+			case LATE:
 				cout << "LATE" << endl;
 				break;
 			}
+			cout << endl;
 		}
 		friend istream &operator>>(istream &input, assignment &A) //meant for File I/O only, not user interaction
 		{
@@ -228,7 +234,11 @@ class assignmentManager
 				{
 					lateCount++;
 				}
-
+				if (itr->getStatus() == LATE)
+				{
+					lateCount++;
+				}
+				itr++;
 			}
 			//cout << "You have " << lateCount << " late assignments." << endl;
 			return lateCount;
@@ -257,43 +267,40 @@ class assignmentManager
 				if (itr->getDueDate() == specifiedDate)
 				{
 					cout << "Would you like to edit the due date (1) or the description (2)?" << endl;
-					do
+					cin >> userChoice;
+					switch (userChoice)
 					{
-							cin >> userChoice;
-							switch (userChoice)
+						case 1:
+							cout << "Enter new due date:" << endl;
+							while (inValidDate == true)
 							{
-							case 1:
-								cout << "Enter new due date:" << endl;
-								while (inValidDate == true)
+								inValidDate = false;
+								try
 								{
-									inValidDate = false;
-									try
-									{
-										cin >> tempDate;
-									}
-									catch (std::exception e) {
-										cout << "Today is invalid, try again" << endl;
-										inValidDate = true;
-									}
+									cin >> tempDate;
 								}
-								itr->editDueDate(tempDate);
-								modified = true;
-								break;
-							case 2:
-								itr->editDescription();
-								cout << "Description edited!" << endl;
-								modified = true;
-								break;
-							default:
-								cout << "Invalid option, try again" << endl;
-								break;
+								catch (std::exception e) {
+									cout << "Today is invalid, try again" << endl;
+									inValidDate = true;
+								}
 							}
-					} while (userChoice != 1 || userChoice != 2);
+							itr->editDueDate(tempDate);
+							modified = true;
+							break;
+						case 2:
+							itr->editDescription();
+							cout << "Description edited!" << endl;
+							modified = true;
+							break;
+						default:
+							cout << "Invalid option!" << endl;
+							break;
+					}
 					wasFound = true;
 				}
 				itr++;
 			}
-			if (wasFound = false)
+			if (wasFound == false)
 			{
 				cout << "Assignment is not in the list. Try again" << endl;
 			}
@@ -304,32 +311,42 @@ class assignmentManager
 			//Declarations:
 			list<assignment>::iterator assignedItr = assigned.begin();
 			list<assignment>::iterator completedItr = completed.begin();
-			assignment tempAssignment;
+			assignment tempAssignment1, tempAssignment2;
 			///////////////
 			//sort assigned list
-			while (assignedItr++ != assigned.end())
+			while (assignedItr != assigned.end())
 			{
-				if (assignedItr->getDueDate() > assignedItr++->getDueDate())
-				{
-					tempAssignment = *assignedItr;
-					*assignedItr = *assignedItr++;
-					*assignedItr++ = tempAssignment;
-					assignedItr = assigned.begin();
-				}
+				tempAssignment1 = *assignedItr;
 				assignedItr++;
+				if (assignedItr != assigned.end())
+				{
+					if (tempAssignment1.getDueDate() > assignedItr->getDueDate())
+					{
+						tempAssignment2 = *assignedItr;
+						*assignedItr = tempAssignment1;
+						assignedItr--;
+						*assignedItr = tempAssignment2;
+						assignedItr = assigned.begin();
+					}
+				}				
 				modified = true;
 			}
 			//short completed list
-			while (completedItr++ != completed.end())
+			while (completedItr != completed.end())
 			{
-				if (completedItr->getDueDate() > completedItr++->getDueDate())
-				{
-					tempAssignment = *completedItr;
-					*completedItr = *completedItr++;
-					*completedItr++ = tempAssignment;
-					completedItr = completed.begin();
-				}
+				tempAssignment1 = *completedItr;
 				completedItr++;
+				if (completedItr != completed.end())
+				{
+					if (tempAssignment1.getDueDate() > completedItr->getDueDate())
+					{
+						tempAssignment2 = *completedItr;
+						*completedItr = tempAssignment1;
+						completedItr--;
+						*completedItr = tempAssignment2;
+						completedItr = completed.begin();
+					}
+				}
 				modified = true;
 			}
 		}
@@ -352,6 +369,7 @@ class assignmentManager
 				}
 				itr++;
 			}
+			cout << "Assignment completed!" << endl;
 		}
 		void load_data(const string& source_name)
 		{
