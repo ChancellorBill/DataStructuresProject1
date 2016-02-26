@@ -306,8 +306,8 @@ class assignmentManager
 			list<assignment>::iterator completedItr = completed.begin();
 			assignment tempAssignment;
 			///////////////
-			//sort assigned and completed list
-			while (assignedItr++ != assigned.end() && completedItr++ != completed.end())
+			//sort assigned list
+			while (assignedItr++ != assigned.end())
 			{
 				if (assignedItr->getDueDate() > assignedItr++->getDueDate())
 				{
@@ -315,32 +315,23 @@ class assignmentManager
 					*assignedItr = *assignedItr++;
 					*assignedItr++ = tempAssignment;
 					assignedItr = assigned.begin();
-					completedItr = completed.begin();
 				}
+				assignedItr++;
+				modified = true;
+			}
+			//short completed list
+			while (completedItr++ != completed.end())
+			{
 				if (completedItr->getDueDate() > completedItr++->getDueDate())
 				{
 					tempAssignment = *completedItr;
 					*completedItr = *completedItr++;
 					*completedItr++ = tempAssignment;
 					completedItr = completed.begin();
-					assignedItr = assigned.begin();
 				}
 				completedItr++;
-				assignedItr++;
 				modified = true;
 			}
-			//short completed list
-			/*while (completedItr++ != completed.end())
-			{
-				if (completedItr->getDueDate > completedItr++->getDueDate())
-				{
-					tempAssignment = *completedItr;
-					*completedItr = *completedItr++;
-					*completedItr++ = tempAssignment;
-					completedItr = completed.begin();
-				}
-				completedItr++;
-			}*/
 		}
 		//Complete Assignments function by William Munshaw
 		void completeAssignment(Date specifiedDate, Date currentDate)
